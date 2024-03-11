@@ -1,0 +1,32 @@
+﻿@model List<Product>
+
+<div class="container my-5 pb-3">
+    <div class="d-flex flex-column flex-md-row pb-3">
+        <div class="col-md-6">
+            <h2 class="text-primary">Product List</h2>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-controller="Product" asp-action="Upsert" class="btn btn-primary rounded">
+                <i class="bi bi-plus-circle"></i> Create New Product
+            </a>
+        </div>
+    </div>              
+
+    <table id="tblData" class="table table-bordered table-striped my-2" style="width:100%">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>ISBN</th>
+                <th>Price</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+@section Scripts {
+    <script src="~/js/product.js"></script>
+}
