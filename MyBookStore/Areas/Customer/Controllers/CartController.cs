@@ -129,7 +129,7 @@ namespace MyBookStore.Areas.Customer.Controllers
                 //It is a regular customer account and we need to capture payment
                 //Stripe Logic
 
-                var domain = "https://localhost:7186/";
+                var domain = Request.Scheme + "://" + Request.Host.Value + "/";
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
                     SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
