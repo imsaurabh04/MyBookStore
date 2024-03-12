@@ -7,15 +7,47 @@ using BulkyWeb.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
 using BulkyWeb.DataAccess.DbInitializer;
+using Azure.Identity;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
+using Microsoft.Extensions.Configuration.AzureKeyVault;
+using Azure.Security.KeyVault.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DbContext")));
 
-builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+var keyVaultURL = builder.Configuration.GetSection("keyVault:keyVaultURL");
+var keyVaultClientId = builder.Configuration.GetSection("keyVault:ClientId");
+var keyVaultClientSecret = builder.Configuration.GetSection("keyVault:ClientSecret");
+var keyVaultDirectoryId = builder.Configuration.GetSection("keyVault:DirectoryId");
+
+var credential = new ClientSecretCredential(keyVaultDirectoryId.Value!.ToString(),
+    keyVaultClientId.Value!.ToString(), keyVaultClientSecret.Value!.ToString());
+
+builder.Configuration.AddAzureKeyVault(keyVaultURL.Value!.ToString(),
+    keyVaultClientId.Value!.ToString(), keyVaultClientSecret.Value.ToString(), new DefaultKeyVaultSecretManager());
+
+var client = new SecretClient(new Uri(keyVaultURL.Value!.ToString()), credential);
+
+if (builder.Environment.IsProduction())
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(client.GetSecret("ProdConnection").Value.Value.ToString()));
+}
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
+
+
+builder.Services.Configure<StripeSettings>(options =>
+{
+    options.SecretKey = client.GetSecret("STRIPESecretKey").Value.Value.ToString();
+    options.PublishableKey = client.GetSecret("STRIPEPublishableKey").Value.Value.ToString();
+});
 
 builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(options =>
@@ -36,8 +68,8 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddAuthentication().AddGitHub(option =>
 {
-    option.ClientId = builder.Configuration.GetSection("GitHub:ClientId").Get<string>();
-    option.ClientSecret = builder.Configuration.GetSection("GitHub:ClientSecret").Get<string>();
+    option.ClientId = client.GetSecret("GITHUBClientId").Value.Value.ToString();
+    option.ClientSecret = client.GetSecret("GITHUBClientSecret").Value.Value.ToString();
 });
 
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
@@ -58,7 +90,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
+StripeConfiguration.ApiKey = client.GetSecret("STRIPESecretKey").Value.Value.ToString();
 
 app.UseRouting();
 app.UseAuthentication();
