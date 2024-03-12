@@ -1,5 +1,9 @@
 ﻿@model ShoppingCart
 
+@{
+    ViewData["Title"] = "Details";
+}
+
 <div class="container pb-5 my-5">
     <form method="post">
         <input hidden asp-for="@Model.ProductId" />

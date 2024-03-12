@@ -1,6 +1,9 @@
 ﻿@page
 @model RegisterModel
 
+@{
+    ViewData["Title"] = (User.IsInRole(SD.Role_Admin) ? "Register | Admin Portal" : "Register");
+}
 
 <div class="row mx-1 my-5">
     <div class="card col-md-6 offset-md-3 shadow border-0 pb-2 mb-5">

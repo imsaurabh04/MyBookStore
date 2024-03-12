@@ -1,5 +1,9 @@
 ﻿@model OrderVM
 
+@{
+    ViewData["Title"] = "Order Details";
+}
+
 <div class="container mb-5 mt-4 pb-5">
     <form method="post">
         <input asp-for="OrderHeader.Id" hidden />
