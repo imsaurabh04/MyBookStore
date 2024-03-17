@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "User List";
+}
+
+<div class="container my-5 pb-3">
+    <div class="row pb-3">
+        <div class="col-12">
+            <h2 class="text-primary">User List</h2>
+        </div>
+    </div>
+
+    <table id="tblData" class="table table-bordered table-striped my-2" style="width:100%">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Company</th>
+                <th>Role</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+@section Scripts {
+    <script src="~/js/user.js"></script>
+}

@@ -88,6 +88,14 @@ bg-success {
     border-color: #425F4B !important;
 }
 
+#zoom {
+    transition: transform 0.5s;
+}
+
+#zoom:hover {
+    transform: scale(1.1);
+}
+
 
 
 /* btn-outline-primary */
